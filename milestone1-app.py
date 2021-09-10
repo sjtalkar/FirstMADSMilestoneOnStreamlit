@@ -668,8 +668,9 @@ st.markdown("""---""")
 # )
 st.markdown(
     """
-<font size="1">    
+<font size="10">    
 | Name | Description | Key Variables | Size | Shape | Format | Access |
+</font>
 |---|---|---|---|---|---|---|
 | State presidential election results dataset | *"This data file contains constituency (state-level) returns for elections to the U.S. presidency from 1976 to 2020"* | `year, candidatevotes, totalvotes` | 500KB | 4287 x 15 | CSV | [Harvard Dataverse website](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX) |
 | County presidential election results dataset | *"This dataset contains county-level returns for presidential elections from 2000 to 2020"* | `year, county_fips, county_name, party` | 7.4MB | 72603 x 12 | CSV | [Harvard Dataverse website](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VOQCHQ) |
@@ -680,7 +681,6 @@ st.markdown(
 | Census Bureau population census and estimates dataset | This dataset contains the 2010 population census data per county and the 2011~2020 population estimates. We are mainly interested in the 2020 estimates | `SUMLEV, STATE, STNAME, CTYNAME, POPESTIMATE2020` | 3.7MB | 3195 x 180 | CSV | [U.S. Census Bureau website](https://www.census.gov/programs-surveys/popest/technical-documentation/research/evaluation-estimates/2020-evaluation-estimates/2010s-counties-total.html) |
 | Unemployment rate dataset | The dataset is the collection of labor force county data tables for 2020 issued by the U.S. Bureau of Labor Statistics | `state_FIPS, county_FIPS, year, month , unemployment_rate` | 7.69MB | >96,000 x 7 | CSV | [Bureau of Labor Statistics website](https://www.bls.gov/web/metro/laucntycur14.zip) only gives access to the last 14 months of data. To capture the unemployment rate for the desired period, we used the BLS v2 public APIs. Registration is required [here](https://data.bls.gov/registrationEngine/). The LAUS codes of all counties must be passed to the API.|
 | Census Urban and Rural dataset | The dataset classifies all the counties in the U.S. as rural or urban areas |`2015 GEOID, State, 2015 Geography Name, 2010 Census Percent Rural`| 302KB | 3142 x 8 | XLS | [U.S. Census Bureau website](https://www.census.gov/programs-surveys/geography/guidance/geo-areas/urban-rural.html) |
-</font>
 """,
     unsafe_allow_html=True,
 )

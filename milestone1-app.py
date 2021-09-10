@@ -212,10 +212,10 @@ for segmentname in [
     formatted_string = "{:.4f}".format(num / denom)
 
     if segmentname == "Stayed Democrat":
-        st.write(f"Fraction of counties in fourth quadrant(per party): ")
-        st.write(f"{segmentname} = {formatted_string}")
+        col1.write(f"Fraction of counties in fourth quadrant(per party): ")
+        col2.write(f"{segmentname} = {formatted_string}")
     else:
-        st.write(f"{segmentname} = {formatted_string}")
+        col3.write(f"{segmentname} = {formatted_string}")
 
 
 st.markdown("""---""")

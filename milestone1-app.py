@@ -467,3 +467,154 @@ def load_unemployment_vaccine_correlation_df():
     )
     return df
 
+
+unemployment_rate_since_2019_df = load_unemployment_rate_since_2019_df()
+unemployment_covid_correlation_df = load_unemployment_covid_correlation_df()
+(
+    unemployment_freq_mask_july_df,
+    unemployment_infreq_mask_july_df,
+) = load_unemployment_and_mask_df()
+unemployment_vaccine_correlation_df = load_unemployment_vaccine_correlation_df()
+
+
+st.header(
+    "Has unemployment an effect on the Covid-19 response?",
+    anchor="unemploymentandcovid",
+)
+st.markdown(
+    """
+Stark unemployment increase was a major side effect of the Covid pandemic. In December 2019 (Elapsed month = 1 in the 
+visualization) the mean of the unemployment rate was 3.79% and 50% of the counties had an unemployment rate between 
+2.7% and 4.4%. By April 2020 (Elapsed month = 4 in the visualization), unemployment rate had jumped to a mean of 
+12.38% and 50% of the counties had an unemployment rate between 8.7% and 15.5%.
+"""
+)
+
+st.altair_chart(createUnemploymentChart(unemployment_rate_since_2019_df))
+
+st.markdown(
+    """
+Could unemployment rate have a bigger impact than political affiliation on the response to the Covid-19, by 
+pushing more people to wear masks or get vaccinated, thus limiting the number of Covid-19 cases?
+"""
+)
+
+st.markdown("""---""")
+
+
+st.markdown(
+    """
+When we look at the *Republican* and *Democrat* counties' monthly average unemployment rate and Covid-19 cases 
+(per 100k people)  since the beginning of the pandemic, we see clearly that they both follow very 
+different trends. The correlation between unemployment rate and covid cases also oscillates erratically between 
+low values (-0.4 and 0.4). This suggests that there is no correlation between unemployment rate and Covid-19 cases.
+
+What we see however is that the average unemployment rate is constantly higher in *Democrat* counties than in 
+*Republican* counties, while at the peak of the pandemic the average Covid-19 cases number was higher in 
+*Republican* counties.
+"""
+)
+
+st.altair_chart(
+    createUnemploymentCorrelationLineChart(
+        unemployment_covid_correlation_df,
+        title="Counties Average Unemployment Rate and Covid-19 Cases Since January 2020",
+        sort=[
+            "Average Covid Cases per 100k",
+            "Average Unemployment Rate",
+            "Correlation",
+        ],
+    )
+)
+
+st.markdown(
+    """
+If there is no correlation between unemployment rate and Covid-19 cases, could there still be one with the Covid-19 
+response like mask usage and vaccination?
+
+A slightly positive correlation (0.372) between unemployment rate and *frequent* mask-wearing habits, and a slightly 
+negative correlation (-0.371) between unemployment rate and *not frequent* mask-wearing habits seem to validate 
+this hypothesis. 
+* The higher the unemployment rate is, the more people seem to follow mask wearing guidelines.
+* The lower the unemployment rate is, the more people seem __not__ to follow mask wearing guidelines.
+
+However, more than a clear correlation, there seem to be a clearer devide along political affiliation.
+* Most counties with high unemployment and high mask usage are Democrat,
+* while most counties with low mask usage and low unemployment are Republican.
+
+It seems that political affiliation is a stronger differentiator in following CDC mask-wearing guidelines than 
+unemployment rate.
+"""
+)
+
+st.altair_chart(
+    createUnemploymentMaskChart(
+        unemployment_freq_mask_july_df, unemployment_infreq_mask_july_df
+    )
+)
+
+st.markdown(
+    """
+When we look at vaccination, the above pattern seems even more clear. The correlation between the percentage of the 
+population with at least 1 dose of vaccination and the unemployment rate is even less clear. However, as for 
+mask-wearing behaviors, we also see that 
+* the counties with high vaccination and high unemployment rates are mainly Democrat
+* the counties with low vaccination and low unemployment rates are mainly Republican
+
+As for mask-wearing, the political affiliation seems to be a stronger differentiator in following CDC vaccination 
+guidelines than unemployment rate.
+"""
+)
+
+st.altair_chart(
+    createUnemploymentCorrelationLineChart(
+        unemployment_vaccine_correlation_df,
+        title="Counties Average Unemployment Rate and Covid-19 Cases Since December 2020",
+        sort=[
+            "Average Unemployment Rate",
+            "Average % of People with 1 Dose of Vaccine",
+            "Correlation",
+        ],
+    )
+)
+
+
+st.markdown(
+    """
+As we wanted to verify if unemployment rate could have a stronger impact on the Covid-19 response than political 
+affiliation, we see that 
+* there is no correlation between Covid-19 case and unemployment rate, and between unemployment rate and Covid-19 
+response behaviors like wearing a mask or getting vaccinated 
+* In average, 
+  * *Democrat* counties have higher unemployment rate, less Covid cases but a better response
+  * *Republican* counties have lower unemployment rate, more Covid cases but a worse response
+
+An hypothesis - which we haven’t verified - could be that instead of unemployment rate driving a stronger response, 
+the effect could be reverse. Counties applying lower restrictions and guidelines see the number of Covid cases 
+increase but as businesses are not forced to close due to strict lock down measures, unemployment did not increase 
+as much as in other counties with stricter rules.
+
+"""
+)
+
+st.markdown("""---""")
+
+# Unemployment rate and Covid
+###########################################
+@st.cache
+def load_unemployment_rate_since_2019_df():
+    df = pd.read_csv(
+        "./data/election_urban_rural_df.csv",
+        dtype={
+            "state_po": str,
+            "county_name": str,
+            "county_fips": int,
+            "candidate": str,
+            "party": str,
+            "candidatevotes": float,
+            "totalvotes": float,
+            "UrbanRural": str,
+            "PctRural": float,
+        },
+    )
+    return df

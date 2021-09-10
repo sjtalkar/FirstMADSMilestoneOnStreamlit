@@ -178,39 +178,44 @@ st.altair_chart(
 
 
 st.write(election_change_and_covid_death_df)
-# df = election_change_and_covid_death_df.copy()
-# df["deaths_avg_per_100k"] = df["deaths_avg_per_100k"].astype("float")
-# df["pct_increase"] = df["pct_increase"].astype("float")
 # col1, col2, col3, col4 = st.columns(4)
 formatted_string = "{:.2f}".format(
     election_change_and_covid_death_df["deaths_avg_per_100k"].mean()
 )
 st.write(f"All counties Average Deaths = {formatted_string}")
 
-# for segmentname in [
-#     "Stayed Democrat",
-#     "Stayed Republican",
-# ]:
-#     num = len(
-#         df[
-#             (df["deaths_avg_per_100k"] >= 1.25)
-#             & (df["pct_increase"] >= 0)
-#             & (df["segmentname"] == segmentname)
-#         ]
-#     )
-#     denom = len(
-#         df[
-#             (df["segmentname"].str.contains(segmentname.replace("To ", "")))
-#             | (df["segmentname"].str.contains(segmentname.replace("Stayed ", "")))
-#         ]
-#     )
-#     formatted_string = "{:.4f}".format(num / denom)
+for segmentname in [
+    "Stayed Democrat",
+    "Stayed Republican",
+]:
+    num = len(
+        election_change_and_covid_death_df[
+            (election_change_and_covid_death_df["deaths_avg_per_100k"] >= 1.25)
+            & (election_change_and_covid_death_df["pct_increase"] >= 0)
+            & (election_change_and_covid_death_df["segmentname"] == segmentname)
+        ]
+    )
+    denom = len(
+        election_change_and_covid_death_df[
+            (
+                election_change_and_covid_death_df["segmentname"].str.contains(
+                    segmentname.replace("To ", "")
+                )
+            )
+            | (
+                election_change_and_covid_death_df["segmentname"].str.contains(
+                    segmentname.replace("Stayed ", "")
+                )
+            )
+        ]
+    )
+    formatted_string = "{:.4f}".format(num / denom)
 
-#     if segmentname == "Stayed Democrat":
-#         col1.write(f"Fraction of counties in fourth quadrant(per party): ")
-#         col2.write(f"{segmentname} = {formatted_string}")
-#     else:
-#         col3.write(f"{segmentname} = {formatted_string}")
+    if segmentname == "Stayed Democrat":
+        st.write(f"Fraction of counties in fourth quadrant(per party): ")
+        st.write(f"{segmentname} = {formatted_string}")
+    else:
+        st.write(f"{segmentname} = {formatted_string}")
 
 
 st.markdown("""---""")

@@ -146,10 +146,6 @@ Stayed Republican.
 
 st.markdown("""---""")
 
-# election_change_and_covid_death_df = pd.read_csv(
-#     "./data/election_change_and_covid_death_df.csv"
-# )
-
 election_change_and_covid_death_df = pd.read_csv(
     "./data/percentile_point_deaths.csv",
     dtype={
@@ -177,8 +173,7 @@ st.altair_chart(
 )
 
 
-st.write(election_change_and_covid_death_df)
-col1, col2, col3, col4 = st.beta_columns(4)
+col1, col2, col3, col4 = st.columns(4)
 formatted_string = "{:.2f}".format(
     election_change_and_covid_death_df["deaths_avg_per_100k"].mean()
 )

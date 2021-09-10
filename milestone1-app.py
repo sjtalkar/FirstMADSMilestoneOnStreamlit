@@ -365,11 +365,6 @@ county_pop_mask_df = pd.read_csv("./data/county_pop_mask_df.csv")
 county_pop_mask_freq_df = pd.read_csv("./data/county_pop_mask_freq_df.csv")
 county_pop_mask_infreq_df = pd.read_csv("./data/county_pop_mask_infreq_df.csv")
 
-st.write(county_pop_mask_df)
-st.write(county_pop_mask_freq_df)
-st.write(county_pop_mask_infreq_df)
-
-
 freq, infreq, excol1 = st.beta_columns(3)
 
 (

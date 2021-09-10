@@ -22,15 +22,15 @@ from Visualization.VizMask import (
     createFreqCountyMaskUsageWithRanges,
 )
 
-# from Visualization.VizUnemployment import (
-#     createUnemploymentChart,
-#     createUnemploymentCorrelationLineChart,
-#     createUnemploymentMaskChart,
-# )
-# from Visualization.VizUrbanRural import (
-#     ElectionUrbanRuralDensityPlot,
-#     UrbanRuralCorrelation,
-# )
+from Visualization.VizUnemployment import (
+    createUnemploymentChart,
+    createUnemploymentCorrelationLineChart,
+    createUnemploymentMaskChart,
+)
+from Visualization.VizUrbanRural import (
+    ElectionUrbanRuralDensityPlot,
+    UrbanRuralCorrelation,
+)
 
 DataFolder = Path("./data/")
 

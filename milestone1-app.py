@@ -193,3 +193,37 @@ st.altair_chart(
 
 st.markdown("""---""")
 
+
+# Affiliation and Vaccine Adoption Rates By State
+###########################################
+st.subheader("Affiliation and Vaccine Adoption Rates By State")
+st.markdown(
+    """To allow the user to wield the power to pause and view the rate at which states in the U.S. adopted the Covid 
+vaccines after it became available, the below visual offers a slider bar with a duration from first shot as range. 
+As Cassie Kozyrkov writes [here](https://towardsdatascience.com/analytics-is-not-storytelling-a1fe61b1ab6c), "As an analyst, I’m not here to funnel you towards my opinion. I’m here to help you form your own."
+In employing interaction in the below visual (originally seen in static form at this [NPR site](https://www.npr.org/2021/06/09/1004430257/theres-a-stark-red-blue-divide-when-it-comes-to-states-vaccination-rates),
+we notice clearly that "blue" states surged forward in vaccinations earlier than the red states after about three 
+months after its release. 
+The size of the bubbles in the chart below is scaled by population of each state.
+The Y-axis positions each state by the percent of its population with at least one shot (since some vaccines require 
+only one shot).
+"""
+)
+
+st.markdown("""---""")
+
+daily_vaccination_percent_df = pd.read_csv("./data/daily_vaccination_percent_df.csv")
+
+daily_vaccination_percent_df["Total population"] = daily_vaccination_percent_df[
+    "Total population"
+].astype("int")
+daily_vaccination_percent_df["day_num"] = daily_vaccination_percent_df[
+    "day_num"
+].astype("int")
+daily_vaccination_percent_df["Percent with one dose"] = daily_vaccination_percent_df[
+    "Percent with one dose"
+].astype("float")
+
+st.altair_chart(createDailyInteractiveVaccinationChart(daily_vaccination_percent_df))
+
+st.markdown("""---""")

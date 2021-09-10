@@ -227,3 +227,167 @@ daily_vaccination_percent_df["Percent with one dose"] = daily_vaccination_percen
 st.altair_chart(createDailyInteractiveVaccinationChart(daily_vaccination_percent_df))
 
 st.markdown("""---""")
+
+
+# Vaccinations and the Delta Variant Case Resurgence
+###########################################
+st.subheader("Vaccinations and the Delta Variant Case Resurgence")
+st.markdown(
+    """The chart below allows for selection of a state in the map to learn about case trend
+for the period after the first Delta variant was detected in the US.The US average and per party averages are also 
+plotted for baseline comparison.
+
+Efficacy of the vaccine over time, for this pandemic, can only be measured as time progresses, since we do not have a 
+precedent. Mutation of the virus is inevitable and immunity response is constantly being monitored.
+The below visualization presents the resurgence in Covid cases that are observed to be rising especially in states with 
+low adoption. We compare an individual state's trend with mean trends pertaining to the US, combined mean of states that 
+voted Republican and states that voted Democrat. It was noted that the resurgent rising trends were notably seen in 
+states such as Louisiana, Missouri, and Florida where the numbers rose well above all the means. These are "red" states. 
+Vermont has a high vaccination adoption and a notably lower trend. Most of the states that voted Democrat also have 
+trends that initially spiked and later settled closer to their mean.
+"""
+)
+
+state_vaccine_df = pd.read_csv("./data/state_vaccine_df.csv")
+us_case_rolling_df = pd.read_csv("./data/us_case_rolling_df.csv")
+state_case_rolling_df = pd.read_csv("./data/state_case_rolling_df.csv")
+state_election_df = pd.read_csv("./data/state_election_df.csv")
+
+state_vaccine_df["STATEFP"] = state_vaccine_df["STATEFP"].astype("int")
+state_case_rolling_df["cases_avg_per_100k"] = state_case_rolling_df[
+    "cases_avg_per_100k"
+].astype("float")
+state_case_rolling_df["STATEFP"] = state_case_rolling_df["STATEFP"].astype("int")
+
+state_election_df["state_fips"] = state_election_df["state_fips"].astype("int")
+state_election_df["candidatevotes"] = state_election_df["candidatevotes"].astype("int")
+state_election_df["totalvotes"] = state_election_df["totalvotes"].astype("int")
+state_election_df["fractionalvotes"] = state_election_df["fractionalvotes"].astype(
+    "float"
+)
+
+
+(
+    vaccine_chart,
+    us_timeseries,
+    stayed_democrat_timeseries,
+    stayed_republican_timeseries,
+    state_cases_delta_chart,
+    state_selectors,
+    rules,
+    tooltip_text2,
+    tooltip_text3,
+    tooltip_text4,
+    tooltip_text5,
+    points,
+    rect_area,
+    delta_rect_area,
+    just_line_state_cases_delta,
+) = createCombinedVaccinationAndDeltaVariantTrend(
+    state_vaccine_df, us_case_rolling_df, state_case_rolling_df, state_election_df
+)
+st.markdown("""---""")
+st.altair_chart(
+    vaccine_chart
+    & alt.layer(
+        (
+            state_cases_delta_chart
+            + us_timeseries
+            + stayed_democrat_timeseries
+            + stayed_republican_timeseries
+            + rect_area
+            + delta_rect_area
+        ),
+        state_selectors,
+        rules,
+        tooltip_text2,
+        tooltip_text3,
+        tooltip_text4,
+        tooltip_text5,
+        points,
+    )  # .properties(width=200, height=100)
+)
+
+st.markdown("""---""")
+
+# Mask Usage by political affiliation
+###########################################
+st.subheader("Frequent and Infrequent Mask Usage by Political affiliation")
+st.markdown(
+    """Mask usage data was collected in a survey by New York Times (through a professional survey firm). The data was 
+    gathered from 250,000 people surveyed in a two week period in July 2020 (please see details in Addendum). 
+    The five choices offered: Never, Rarely, Sometimes, Frequently Always. The estimations of all five for every county, 
+    provided as a float adds up to 1.
+This was binned into Not Frequent (Never, Rarely, Sometimes) and Infrequent (Frequently, Always) usage which 
+for every county now adds up to 1. Binning is a common technique used to convert a quantitative data into a categorical
+value and this technique was once again applied to bin the estimates into ranges of Low, Medium and High chance of 
+frequent and infrequent usage of masks.
+ 
+The density plot of mask usage, shows the distribution of infrequent and frequent mask usage among counties (that the 
+surveyed participant resides in) that voted Democrat or Republican.
+We see that relatively, there is a higher probability of mask usage among the counties voting for Democrats over the 
+Republicans.
+
+To drill into the distribution, the spatial map can be studied at a lower granularity of each county. 
+It also shows that CDC masking guidelines are better appreciated in the well-populated areas along the east 
+and west urban coast of the US (irrespective of affiliation)-select Democrat/Republican - High Mask usage in Frequent 
+mask usage chart. In the heartland, a lukewam acceptance to the guidelines is observed - select Democrat/Republican 
+Low mask usage in Infrequent mask usage chart. 
+"""
+)
+
+mask_distribution_df = pd.read_csv("./data/mask_distribution_df.csv")
+# st.markdown("""---""")
+st.altair_chart(createMaskUsageDistributionChart(mask_distribution_df))
+# st.markdown("""---""")
+county_pop_mask_df = pd.read_csv("./data/county_pop_mask_df.csv")
+county_pop_mask_freq_df = pd.read_csv("./data/county_pop_mask_freq_df.csv")
+county_pop_mask_infreq_df = pd.read_csv("./data/county_pop_mask_infreq_df.csv")
+
+freq, infreq, excol1 = st.columns(3)
+
+(
+    county_mask_chart,
+    legend_republican,
+    legend_democrat,
+    average_mask_chart,
+) = createFreqCountyMaskUsageWithRanges(
+    "FREQUENT",
+    county_pop_mask_df,
+    county_pop_mask_freq_df,
+    county_pop_mask_infreq_df,
+    mask_distribution_df,
+)
+freq.altair_chart(
+    (
+        (county_mask_chart)
+        & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
+            color="independent"
+        )
+    ).configure_title(align="left", anchor="start")
+)
+
+(
+    county_mask_chart,
+    legend_republican,
+    legend_democrat,
+    average_mask_chart,
+) = createFreqCountyMaskUsageWithRanges(
+    "INFREQUENT",
+    county_pop_mask_df,
+    county_pop_mask_freq_df,
+    county_pop_mask_infreq_df,
+    mask_distribution_df,
+)
+
+infreq.altair_chart(
+    (
+        (county_mask_chart)
+        & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
+            color="independent"
+        )
+    ).configure_title(align="left", anchor="start")
+)
+
+st.markdown("""---""")
+

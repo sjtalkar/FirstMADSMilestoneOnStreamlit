@@ -182,10 +182,10 @@ st.write(election_change_and_covid_death_df)
 # df["deaths_avg_per_100k"] = df["deaths_avg_per_100k"].astype("float")
 # df["pct_increase"] = df["pct_increase"].astype("float")
 col1, col2, col3, col4 = st.columns(4)
-formatted_string = "{:.2f}".format(
-    election_change_and_covid_death_df["deaths_avg_per_100k"].mean()
-)
-st.write(f"All counties Average Deaths = {formatted_string}")
+# formatted_string = "{:.2f}".format(
+#     election_change_and_covid_death_df["deaths_avg_per_100k"].mean()
+# )
+# st.write(f"All counties Average Deaths = {formatted_string}")
 
 # for segmentname in [
 #     "Stayed Democrat",

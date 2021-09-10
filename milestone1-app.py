@@ -668,7 +668,7 @@ st.markdown("""---""")
 # )
 st.markdown(
     """
-|<font size="5"> Name </font>|<font size="5"> Description </font>|<font size="5"> Key Variables |<font size="5"> Size </font>|<font size="5"> Shape </font>|<font size="5"> Format </font>|<font size="5"> Access </font>|
+|<font size="5"> Name </font>|<font size="5"> Description </font>|<font size="5"> Key Variables</font> |<font size="5"> Size </font>|<font size="5"> Shape </font>|<font size="5"> Format </font>|<font size="5"> Access </font>|
 |---|---|---|---|---|---|---|
 |<font size="5"> State presidential election results dataset </font>|<font size="5"> *"This data file contains constituency (state-level) returns for elections to the U.S. presidency from 1976 to 2020"* </font>|<font size="5"> `year, candidatevotes, totalvotes` </font>|<font size="5"> 500KB </font>|<font size="5"> 4287 x 15 </font>|<font size="5"> CSV </font>|<font size="5"> [Harvard Dataverse website](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/42MVDX) </font>|
 |<font size="5"> County presidential election results dataset </font>|<font size="5"> *"This dataset contains county-level returns for presidential elections from 2000 to 2020"* </font>|<font size="5"> `year, county_fips, county_name, party` </font>|<font size="5"> 7.4MB </font>|<font size="5"> 72603 x 12 </font>|<font size="5"> CSV </font>|<font size="5"> [Harvard Dataverse website](https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/VOQCHQ) </font>|

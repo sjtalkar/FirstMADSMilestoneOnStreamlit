@@ -165,30 +165,30 @@ formatted_string = "{:.2f}".format(
 )
 st.write(f"All counties Average Deaths = {formatted_string}")
 
-for segmentname in [
-    "Stayed Democrat",
-    "Stayed Republican",
-]:
-    num = len(
-        df[
-            (df["deaths_avg_per_100k"] >= 1.25)
-            & (df["pct_increase"] >= 0)
-            & (df["segmentname"] == segmentname)
-        ]
-    )
-    denom = len(
-        df[
-            (df["segmentname"].str.contains(segmentname.replace("To ", "")))
-            | (df["segmentname"].str.contains(segmentname.replace("Stayed ", "")))
-        ]
-    )
-    formatted_string = "{:.4f}".format(num / denom)
+# for segmentname in [
+#     "Stayed Democrat",
+#     "Stayed Republican",
+# ]:
+#     num = len(
+#         df[
+#             (df["deaths_avg_per_100k"] >= 1.25)
+#             & (df["pct_increase"] >= 0)
+#             & (df["segmentname"] == segmentname)
+#         ]
+#     )
+#     denom = len(
+#         df[
+#             (df["segmentname"].str.contains(segmentname.replace("To ", "")))
+#             | (df["segmentname"].str.contains(segmentname.replace("Stayed ", "")))
+#         ]
+#     )
+#     formatted_string = "{:.4f}".format(num / denom)
 
-    if segmentname == "Stayed Democrat":
-        col1.write(f"Fraction of counties in fourth quadrant(per party): ")
-        col2.write(f"{segmentname} = {formatted_string}")
-    else:
-        col3.write(f"{segmentname} = {formatted_string}")
+#     if segmentname == "Stayed Democrat":
+#         col1.write(f"Fraction of counties in fourth quadrant(per party): ")
+#         col2.write(f"{segmentname} = {formatted_string}")
+#     else:
+#         col3.write(f"{segmentname} = {formatted_string}")
 
 
 st.markdown("""---""")

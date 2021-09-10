@@ -150,7 +150,26 @@ st.markdown("""---""")
 #     "./data/election_change_and_covid_death_df.csv"
 # )
 
-election_change_and_covid_death_df = pd.read_csv("./data/percentile_point_deaths.csv")
+election_change_and_covid_death_df = pd.read_csv(
+    "./data/percentile_point_deaths.csv",
+    dtype={
+        "COUNTYFP": "int",
+        "deaths_avg_per_100k": "float",
+        "state": "str",
+        "state_po": "str",
+        "CTYNAME": "str",
+        "party_winner_2020": "str",
+        "total_votes_2020": "float",
+        "fractionalvotes_2020": "float",
+        "party_winner_2016": "str",
+        "total_votes_2016": "float",
+        "fractionalvotes_2016": "float",
+        "changecolor": "str",
+        "_merge": "str",
+        "pct_increase": "float",
+        "segementname": "str",
+    },
+)
 st.altair_chart(
     createPercentPointChangeAvgDeathsChart(
         election_change_and_covid_death_df

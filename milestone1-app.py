@@ -158,6 +158,7 @@ st.altair_chart(
 )
 
 
+st.write(election_change_and_covid_death_df)
 # df = election_change_and_covid_death_df.copy()
 # df["deaths_avg_per_100k"] = df["deaths_avg_per_100k"].astype("float")
 # df["pct_increase"] = df["pct_increase"].astype("float")
@@ -346,50 +347,55 @@ county_pop_mask_df = pd.read_csv("./data/county_pop_mask_df.csv")
 county_pop_mask_freq_df = pd.read_csv("./data/county_pop_mask_freq_df.csv")
 county_pop_mask_infreq_df = pd.read_csv("./data/county_pop_mask_infreq_df.csv")
 
-freq, infreq, excol1 = st.columns(3)
+st.write(county_pop_mask_df)
+st.write(county_pop_mask_freq_df)
+st.write(county_pop_mask_infreq_df)
 
-(
-    county_mask_chart,
-    legend_republican,
-    legend_democrat,
-    average_mask_chart,
-) = createFreqCountyMaskUsageWithRanges(
-    "FREQUENT",
-    county_pop_mask_df,
-    county_pop_mask_freq_df,
-    county_pop_mask_infreq_df,
-    mask_distribution_df,
-)
-freq.altair_chart(
-    (
-        (county_mask_chart)
-        & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
-            color="independent"
-        )
-    ).configure_title(align="left", anchor="start")
-)
 
-(
-    county_mask_chart,
-    legend_republican,
-    legend_democrat,
-    average_mask_chart,
-) = createFreqCountyMaskUsageWithRanges(
-    "INFREQUENT",
-    county_pop_mask_df,
-    county_pop_mask_freq_df,
-    county_pop_mask_infreq_df,
-    mask_distribution_df,
-)
+# freq, infreq, excol1 = st.columns(3)
 
-infreq.altair_chart(
-    (
-        (county_mask_chart)
-        & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
-            color="independent"
-        )
-    ).configure_title(align="left", anchor="start")
-)
+# (
+#     county_mask_chart,
+#     legend_republican,
+#     legend_democrat,
+#     average_mask_chart,
+# ) = createFreqCountyMaskUsageWithRanges(
+#     "FREQUENT",
+#     county_pop_mask_df,
+#     county_pop_mask_freq_df,
+#     county_pop_mask_infreq_df,
+#     mask_distribution_df,
+# )
+# freq.altair_chart(
+#     (
+#         (county_mask_chart)
+#         & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
+#             color="independent"
+#         )
+#     ).configure_title(align="left", anchor="start")
+# )
+
+# (
+#     county_mask_chart,
+#     legend_republican,
+#     legend_democrat,
+#     average_mask_chart,
+# ) = createFreqCountyMaskUsageWithRanges(
+#     "INFREQUENT",
+#     county_pop_mask_df,
+#     county_pop_mask_freq_df,
+#     county_pop_mask_infreq_df,
+#     mask_distribution_df,
+# )
+
+# infreq.altair_chart(
+#     (
+#         (county_mask_chart)
+#         & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
+#             color="independent"
+#         )
+#     ).configure_title(align="left", anchor="start")
+# )
 
 st.markdown("""---""")
 

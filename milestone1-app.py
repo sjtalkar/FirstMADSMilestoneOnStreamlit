@@ -412,3 +412,58 @@ infreq.altair_chart(
 
 st.markdown("""---""")
 
+# Unemployment rate and Covid
+###########################################
+@st.cache
+def load_unemployment_rate_since_2019_df():
+    df = pd.read_csv(
+        "./data/unemployment_rate_since_2019_df.csv",
+        dtype={
+            "month": str,
+            "unemployment_rate": float,
+            "COUNTYFP": int,
+            "month_since_start": int,
+            "party": str,
+        },
+    )
+    return df
+
+
+@st.cache
+def load_unemployment_covid_correlation_df():
+    df = pd.read_csv(
+        "./data/unemployment_covid_correlation_df.csv",
+        dtype={"month": str, "party": str, "variable": str, "value": float},
+    )
+    return df
+
+
+@st.cache
+def load_unemployment_and_mask_df():
+    dtypes = {
+        "COUNTYFP": int,
+        "unemployment_rate": float,
+        "cases_avg_per_100k": float,
+        "deaths_avg_per_100k": float,
+        "party": str,
+        "NEVER": float,
+        "RARELY": float,
+        "SOMETIMES": float,
+        "FREQUENTLY": float,
+        "ALWAYS": float,
+    }
+    freq_df = pd.read_csv("./data/unemployment_freq_mask_july_df.csv", dtype=dtypes,)
+    infreq_df = pd.read_csv(
+        "./data/unemployment_infreq_mask_july_df.csv", dtype=dtypes,
+    )
+    return freq_df, infreq_df
+
+
+@st.cache
+def load_unemployment_vaccine_correlation_df():
+    df = pd.read_csv(
+        "./data/unemployment_vaccine_correlation_df.csv",
+        dtype={"month": str, "party": str, "variable": str, "value": float},
+    )
+    return df
+

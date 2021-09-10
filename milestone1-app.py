@@ -101,3 +101,95 @@ From the visualization we observed that the rate of rise of the infection was ma
 the first year of the pandemic, in the populations that voted Republican (remained loyal in 2020 or switched from 2016).  
 """
 )
+
+# Get rolling average of cases by segment
+case_rolling_df = pd.read_csv("./data/case_rolling_df.csv")
+# Create the chart
+(
+    base,
+    make_selector,
+    highlight_segment,
+    radio_select,
+) = createCovidConfirmedTimeseriesChart(case_rolling_df)
+selectors, rules, points, tooltip_text = createTooltip(
+    base, radio_select, case_rolling_df
+)
+
+
+st.markdown("""---""")
+# Bring all the layers together with layering and concatenation
+st.altair_chart(
+    (
+        alt.layer(highlight_segment, selectors, points, rules, tooltip_text)
+        | make_selector
+    ).configure_title(align="left", anchor="start")
+)
+
+st.markdown("""---""")
+
+# Strength of affiliation and COVID deaths at County level
+###########################################
+st.subheader("Strength of affiliation and COVID deaths at County level")
+st.markdown(
+    """Does strength of affiliation, as determined by the percentile point change in votes received by a party in 2020 
+    over 2016, show any correlation to the number of Covid related deaths in that county? 
+With the below visual, we compared the counties voting for each party that suffered the most deaths per 100K population.
+ The scatter plot is divided into four quadrants.
+The quadrant to the top right contains counties with most deaths and more percentile point change in votes in favor 
+of a party.
+By selecting each segment in the dropdown the counties that Stayed Democrat suffered marginally less than those that 
+Stayed Republican.
+
+> [Chart Design Credit to NPR](https://www.npr.org/sections/health-shots/2020/11/06/930897912/many-places-hard-hit-by-covid-19-leaned-more-toward-trump-in-2020-than-2016)
+"""
+)
+
+st.markdown("""---""")
+
+# election_change_and_covid_death_df = pd.read_csv(
+#     "./data/election_change_and_covid_death_df.csv"
+# )
+
+election_change_and_covid_death_df = pd.read_csv("./data/percentile_point_deaths.csv")
+st.altair_chart(
+    createPercentPointChangeAvgDeathsChart(
+        election_change_and_covid_death_df
+    ).configure_title(align="left", anchor="start")
+)
+df = election_change_and_covid_death_df.copy()
+df["deaths_avg_per_100k"] = df["deaths_avg_per_100k"].astype("float")
+df["pct_increase"] = df["pct_increase"].astype("float")
+col1, col2, col3, col4 = st.columns(4)
+formatted_string = "{:.2f}".format(
+    election_change_and_covid_death_df["deaths_avg_per_100k"].mean()
+)
+st.write(f"All counties Average Deaths = {formatted_string}")
+
+for segmentname in [
+    "Stayed Democrat",
+    "Stayed Republican",
+]:
+    num = len(
+        df[
+            (df["deaths_avg_per_100k"] >= 1.25)
+            & (df["pct_increase"] >= 0)
+            & (df["segmentname"] == segmentname)
+        ]
+    )
+    denom = len(
+        df[
+            (df["segmentname"].str.contains(segmentname.replace("To ", "")))
+            | (df["segmentname"].str.contains(segmentname.replace("Stayed ", "")))
+        ]
+    )
+    formatted_string = "{:.4f}".format(num / denom)
+
+    if segmentname == "Stayed Democrat":
+        col1.write(f"Fraction of counties in fourth quadrant(per party): ")
+        col2.write(f"{segmentname} = {formatted_string}")
+    else:
+        col3.write(f"{segmentname} = {formatted_string}")
+
+
+st.markdown("""---""")
+

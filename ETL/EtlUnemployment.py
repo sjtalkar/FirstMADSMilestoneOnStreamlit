@@ -8,8 +8,8 @@ import sys
 sys.path.append("../ETL")
 from datetime import datetime, date
 from .EtlBase import DataFolder
-from .EtlElection import *
-from .EtlCovid import *
+from .EtlElection import getElectionData
+from .EtlCovid import getCasesRollingAveragePer100K
 
 
 
@@ -17,20 +17,45 @@ from .EtlCovid import *
 # Get the unemployment data from December 2019 per county using the BLS APIs
 ##########################################################################################
 def get_counties_bls_laus_codes():
+    """
+    This function reads a file downloaded from the Bureau of Labor Statistics website
+    (https://www.bls.gov/web/metro/laucntycur14.zip) to extract the LAUS codes for all counties
+    and export the result in a CSV file.
+
+    :return: None
+    """
     unemployment_df = pd.read_excel(DataFolder / r"laucntycur14.xlsx",
                                     names=["LAUS_code","state_FIPS","county_FIPS","county_name_and_state_abbreviation","Period","labor_force","employed","unemployed","unemployment_rate"],
                                     header=5,
                                     skipfooter=3)
     unemployment_df["LAUS_code"] = unemployment_df["LAUS_code"].apply(lambda x: "LAU" + x + "03")
     list_laus_codes = unemployment_df["LAUS_code"].unique()
-    pd.Series(list_laus_codes).to_csv(r"../DataForPresidentialElectionsAndCovid/bls_laus_codes.csv", header=None, index=None)
+    pd.Series(list_laus_codes).to_csv(DataFolder / r"bls_laus_codes.csv", header=None, index=None)
     
 def split_codes_in_chunks(lst, n):
-    """Yield successive n-sized chunks from lst."""
+    """
+    Yield successive n-sized chunks from lst.
+
+    :param lst: the list to yield from
+    :param n: the size of each chunk
+    :return: a chunk of n items from the list
+    """
     for i in range(0, len(lst), n):
         yield lst[i:i + n]
     
 def get_unemployment_rates_from_api(apy_key):
+    """
+    This function takes the list of LAUS code created in the "bls_laus_codes.csv" by the get_counties_bls_laus_codes
+    function, and calls the Bureau of Labor Statistics v2 API to gather all unemployment rates since the beginning of
+    2019.
+
+    It queries the BLS API in chunks of 50 LUAS codes due to throttling constraints on the BLS API.
+
+    The result is stored in the "bls_unemployment_rates.csv" file
+
+    :param apy_key: The Bureau of Labor Statistics website API v2 key
+    :return: None
+    """
     bls_laus_codes = list(pd.read_csv(DataFolder / r"bls_laus_codes.csv", header=None).iloc[:,0])
     #for laus_code in bls_laus_codes:
     headers = {'Content-type': 'application/json'}
@@ -64,7 +89,7 @@ def get_unemployment_rates_from_api(apy_key):
             i+=1
         else:
              print(str(i) + " - ERROR - code = " + str(r.status_code))
-    unemployment_df.to_csv(r"../DataForPresidentialElectionsAndCovid/bls_unemployment_rates.csv", header=None, index=None)
+    unemployment_df.to_csv(DataFolder / r"bls_unemployment_rates.csv", header=None, index=None)
 
 
     
@@ -72,6 +97,14 @@ def get_unemployment_rates_from_api(apy_key):
 # Get the pre-pandemic December 2019 data
 ##########################################################################################
 def getUnemploymentRateSince122019():
+    """
+    This ETL function takes the following datasets:
+    * U.S. counties monthly unemployment rates since 2019: bls_unemployment_rates.csv
+    * The results of the 2020 U.S. presidential election by calling the EtlElection.getElectionData() function
+
+    :return: A dataframe of counties unemployment rate since December 2019 and their political affiliation
+    according to the results of the 2020 presidential election
+    """
     #
     # Prepare unemployment Data
     # 
@@ -107,17 +140,14 @@ def getUnemploymentRateSince122019():
 ##########################################################################################
 def getUnemploymentCovidBase():
     """
-        THIS FUNCTION reads the county level unemployment rate from the 2020 dataset published by the BLS
-        and 
-        
-        Functions called: 
-        
-        Input: 
-            level (str): "county" or "state". Indicate the level at which the data should be aggregated.
-        Returns: Dataframe unemployment_covid_df
-                
+    This ETL function takes the following datasets:
+    * U.S. counties monthly unemployment rates since 2019: bls_unemployment_rates.csv
+    * The Covid-19 daily rolling average by calling the EtlCovid.getCasesRollingAveragePer100K() function
+    * The results of the 2020 U.S. presidential election by calling the EtlElection.getElectionData() function
+
+    :return: A dataframe since January 2020 of counties monthly unemployment rate and average Covid-19 cases together
+    with their political affiliation according to the results of the 2020 presidential election
     """
-    
     #
     # Prepare unemployment Data
     # 
@@ -162,6 +192,18 @@ def getUnemploymentCovidBase():
 
 
 def getUnemploymentCovidCorrelationPerMonth(df=None):
+    """
+    This ETL function takes or reads the dataset of counties monthly unemployment and Covid rates and political
+    affiliation since January 2020.
+    Computes the monthly correlation for all Republican and Democrat counties between unemployment rate and Covid-19
+    cases
+
+    :return: A dataframe since January 2020 of counties:
+    * unemployment rate
+    * average Covid-19 cases
+    * correlation between unemployment and Covid-19 cases
+    per month and political affiliation
+    """
     if df is None:
         unemployment_covid_df = getUnemploymentCovidBase()
     else:
@@ -198,6 +240,16 @@ def getUnemploymentCovidCorrelationPerMonth(df=None):
 
 
 def getJuly2020UnemploymentAndMask(df=None):
+    """
+    This ETL function takes the following datasets:
+    * counties monthly unemployment and Covid rates and political affiliation since January 2020.
+    * The New York Times mask usage survey from July 2020
+
+    :return: A dataframe for July 2020 of counties:
+    * unemployment rate
+    * FREQUENT (binned from "ALWAYS", "FREQUENTLY") and "NOT FREQUENT" (binned from "SOMETIMES", "FREQUENTLY", "ALWAYS")
+    * political affiliation
+    """
     if df is None:
         unemployment_covid_df = getUnemploymentCovidBase()
     else:
@@ -266,6 +318,20 @@ def getJuly2020UnemploymentAndMask(df=None):
 
 
 def getUnemploymentVaccineCorrelationPerMonth(df=None):
+    """
+    This ETL function:
+    * takes or reads the dataset of counties monthly unemployment rates since December 2019.
+    * reads the counties monthly vaccination rate
+    * computes the monthly correlation for all Republican and Democrat counties between unemployment rate and Covid-19
+    cases
+    * merges everything together
+
+    :return: A dataframe since January 2020 of counties:
+    * unemployment rate
+    * vaccination rate
+    * correlation between unemployment and vaccination rate
+    per month and political affiliation
+    """
     if df is None:
         unemployment_df = getUnemploymentRateSince122019()
     else:
@@ -284,7 +350,7 @@ def getUnemploymentVaccineCorrelationPerMonth(df=None):
         }
     )
     # Remove unknown counties and non mainland US states and unknown counties
-    county_vaccine_df = county_vaccine_df[county_vaccine_df["COUNTYFP"] != "UNK"]
+    county_vaccine_df = county_vaccine_df[county_vaccine_df["COUNTYFP"] != "UNK"].copy()
     county_vaccine_df["COUNTYFP"] = county_vaccine_df["COUNTYFP"].astype("int")
     county_vaccine_df = county_vaccine_df[county_vaccine_df["COUNTYFP"] < 57000]
     # Get the month as a period

@@ -6,6 +6,15 @@ import sys
 
 sys.path.append("../ETL")
 from .EtlBase import DataFolder
+from .EtlCovid import (
+    getRollingCaseAverageSegmentLevel,
+    getCasesRollingAveragePer100K,
+    getPercentilePointChageDeathsData,
+)
+from .EtlElection import (
+    getElectionSegmentsData,
+    getElectionData
+)
 
 #########################################################################################################
 
@@ -130,13 +139,26 @@ def MergeElectionUrbanRural():
     return ElecUrbanRuralDF
 
 #########################################################################################################
+def getUrbanRuralElectionRollingData(df:pd.DataFrame()=None):
+    urban_rural_election_df = getElectionData(df)
+    urban_rural_segment_df = getElectionSegmentsData(election_winners_df=urban_rural_election_df)
+    case_rolling_df = getCasesRollingAveragePer100K()
+    final_df = getRollingCaseAverageSegmentLevel(case_rolling_df, urban_rural_segment_df)
+    return final_df
 
-def CountyElecUrbanRuralSplit():
+def getUrbanRuralAvgDeathsData(df:pd.DataFrame()=None):
+    urban_rural_election_df = getElectionData(df)
+    urban_rural_segment_df = getElectionSegmentsData(election_winners_df=urban_rural_election_df)
+    case_rolling_df = getCasesRollingAveragePer100K()
+    final_df = getPercentilePointChageDeathsData(case_rolling_df, urban_rural_segment_df)
+    return final_df
+
+def CountyElecUrbanRuralSplit(etl_function=getUrbanRuralElectionRollingData):
     '''
     Reads in a CSV file with county-level presidential election results.
     Merges the data with the urban/rural designations of the counties.
-    Splits the data by designation and writes out to two CSV files with
-    the following columns:
+    Splits the data by designation into two additonal dataframes. All
+    three dataframes have the following columns:
         year: Election year
         state: Full state name
         state_po: State two-letter abbreviation
@@ -151,9 +173,10 @@ def CountyElecUrbanRuralSplit():
         mode: [Relevant to data collection]
         Urban/Rural: String designating a county as "urban" or "rural"
         PctRural: Percentage of "how rural" a county is according to the census
-    Returns: None
+        
+    Returns: Full, urban and rural dataframes
 
-    Called by: Main code
+    Called by: UrbanRuralCompChart()
     Functions called: GetCountyUrbanRuralData()
     '''
     
@@ -166,13 +189,14 @@ def CountyElecUrbanRuralSplit():
     # Merge the two to allow filtering by designation.
     CountyPresFull = CountyPresDF.merge(CountyUrbanRural, on='county_fips', how='inner')
     
-    # Split in to urban and rural, and write each to a separate file
+    # Split into urban and rural
     CountyPresFullUrban = CountyPresFull[CountyPresFull['UrbanRural']=='urban']
-    CountyPresFullUrban.to_csv(DataFolder / 'CountyPresFullUrban', index=False)
-    
     CountyPresFullRural = CountyPresFull[CountyPresFull['UrbanRural']=='rural']
-    CountyPresFullRural.to_csv(DataFolder / 'CountyPresFullRural', index=False)
+
+    FullDF = etl_function(CountyPresFull)
+    UrbanDF = etl_function(CountyPresFullUrban)
+    RuralDF = etl_function(CountyPresFullRural)
     
-    return
+    return (FullDF, UrbanDF, RuralDF)
 
 #########################################################################################################

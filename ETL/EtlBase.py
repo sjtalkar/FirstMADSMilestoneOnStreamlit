@@ -1,6 +1,6 @@
 from pathlib import Path
 
-DataFolder = Path("../DataForPresidentialElectionsAndCovid/")
+DataFolder = Path("./sample_datasets/")
 
 ## Color global variables
 TO_OTHER = "#556B2F"

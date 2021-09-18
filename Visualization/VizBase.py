@@ -1,6 +1,5 @@
 import altair as alt
 
-# import plotly.io as plt_io
 import sys
 
 from vega_datasets import data
@@ -16,22 +15,23 @@ alt.data_transformers.enable("json")
 alt.data_transformers.disable_max_rows()
 
 
+
 ########################################################################################
 def createCovidConfirmedTimeseriesChart(case_rolling_df):
     """
       THIS FUNCTION uses the 'base' encoding chart created by getBaseChart() to create a line chart.
-
+      
       The highlight_segment variable uses the mark_line function to create a line chart out of the encoding. The
       color of the line is set using the conditional color set for the categorical variable using the selection.
       The chart is bound to the selection using add_selection.
-
+      
       It also creates a selector element of a vertical array of circles so the user can select between segment.
-
+      
       Functions called: getSelection(), getBaseChart()
       Called by: Main code
-
+        
       Input: Dataframe with rolling average of cases created by getRollingCaseAverageSegmentLevel()
-      Returns: base, make_selector, highlight_segment, radio_select
+      Returns: base, make_selector, highlight_segment, radio_select      
 
     """
 
@@ -49,15 +49,15 @@ def createCovidConfirmedTimeseriesChart(case_rolling_df):
             ),
             color=change_color_condition,
         )
-            .add_selection(radio_select)
+        .add_selection(radio_select)
     )
 
     base = getBaseChart(case_rolling_df, ["2020-01-01", "2020-12-31"])
-    base = base.properties(width=600, height=400)
+
     highlight_segment = (
         base.mark_line(strokeWidth=1)
-            .add_selection(radio_select)
-            .encode(
+        .add_selection(radio_select)
+        .encode(
             color=change_color_condition,
             strokeDash=alt.condition(
                 (alt.datum.segmentname == "To Democrat")
@@ -76,9 +76,9 @@ def getSelection():
     """
       THIS FUNCTION creates a selection element and uses it to 'conditionally' set a color
       for a categorical variable (segment).
-
+      
       It return both the single selection as well as the Category for Color choice set based on selection.
-
+      
       Functions called: None
       Called by: createChart()
 
@@ -105,14 +105,14 @@ def getBaseChart(case_rolling_df, date_range):
     """
       THIS FUNCTION creates a chart by encoding the date along the X positional axis and rolling mean
       along the Y positional axis. The mark (bar/line..) can be decided upon by the calling function.
-
+      
       Functions called: None
       Called by: createChart()
 
       Input: Dataframe passed by calling function. The date column is expected to be 'date'
              date_range : a list containing min and max date to be considered for the time series eg["2020-01-01", "2020-12-31"]
       Returns: Base chart
-
+      
     """
 
     # Set the date range for which the timeseries has to be graphed
@@ -121,7 +121,7 @@ def getBaseChart(case_rolling_df, date_range):
     source = case_rolling_df[
         (case_rolling_df["date"] >= date_range[0])
         & (case_rolling_df["date"] <= date_range[1])
-        ].copy()
+    ].copy()
 
     base = (
         alt.Chart(
@@ -135,7 +135,8 @@ def getBaseChart(case_rolling_df, date_range):
                     "Shift + Click for multiple selections",
                 ],
             },
-        ).encode(
+        )
+        .encode(
             x=alt.X(
                 "date:T",
                 timeUnit="yearmonthdate",
@@ -152,7 +153,7 @@ def getBaseChart(case_rolling_df, date_range):
                 axis=alt.Axis(title="Cases (rolling mean per 100K)"),
             ),
         )
-        # .properties(width=600, height=400)
+        #.properties(width=600, height=400)
     )
     return base
 
@@ -162,7 +163,7 @@ def createTooltip(base, radio_select, case_rolling_df):
     """
       THIS FUNCTION uses the 'base' encoding chart and the selection captured to create four elements
       related to selection.
-
+      
       Functions called: None
       Called by: Main code
 
@@ -179,16 +180,16 @@ def createTooltip(base, radio_select, case_rolling_df):
     # the x-value of the cursor
     selectors = (
         alt.Chart(case_rolling_df)
-            .mark_point()
-            .encode(x="date:T", opacity=alt.value(0), )
-            .add_selection(nearest)
+        .mark_point()
+        .encode(x="date:T", opacity=alt.value(0),)
+        .add_selection(nearest)
     )
 
     # Draw points on the line, and highlight based on selection
     points = (
         base.mark_point(size=5, dy=-10)
-            .encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
-            .transform_filter(radio_select)
+        .encode(opacity=alt.condition(nearest, alt.value(1), alt.value(0)))
+        .transform_filter(radio_select)
     )
 
     # Draw text labels near the points, and highlight based on selection
@@ -199,14 +200,15 @@ def createTooltip(base, radio_select, case_rolling_df):
                 nearest, alt.Text("cases_avg_per_100k:Q", format=".2f"), alt.value(" "),
             ),
         )
-            .transform_filter(radio_select)
+        .transform_filter(radio_select)
     )
 
     # Draw a rule at the location of the selection
     rules = (
         alt.Chart(case_rolling_df)
-            .mark_rule(color="darkgrey", strokeWidth=2, strokeDash=[5, 4])
-            .encode(x="date:T", )
-            .transform_filter(nearest)
+        .mark_rule(color="darkgrey", strokeWidth=2, strokeDash=[5, 4])
+        .encode(x="date:T",)
+        .transform_filter(nearest)
     )
     return selectors, rules, points, tooltip_text
+

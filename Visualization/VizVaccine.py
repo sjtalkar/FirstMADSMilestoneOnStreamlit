@@ -20,9 +20,10 @@ alt.data_transformers.disable_max_rows()
 
 ########################################################################################
 def createStateVaccinationChart():
+
     """
       THIS FUNCTION creates a chart relating vaccination data to 2020 presidential election winning party.
-
+      
       Functions called: createStateVaccinationData()
       Called by: Main code
 

@@ -8,7 +8,8 @@ from .EtlBase import DataFolder, segment_color_dict
 
 
 ########################################################################################
-def getElectionSegmentsData(segment_color_dict=segment_color_dict):
+def getElectionSegmentsData(segment_color_dict:dict=segment_color_dict,
+                            election_winners_df:pd.DataFrame()=None):
     """
         THIS FUNCTION obtains the dataframe election_winners_df from the function getElectionData(),
         adds a color column, then uses the color to indicate whether or not the county was won by a
@@ -29,7 +30,8 @@ def getElectionSegmentsData(segment_color_dict=segment_color_dict):
         
     """
 
-    election_winners_df = getElectionData()
+    if (election_winners_df is None):
+        election_winners_df = getElectionData()
 
     # Set a variable of color that marks NO change and other categories
 
@@ -65,7 +67,7 @@ def getElectionSegmentsData(segment_color_dict=segment_color_dict):
 
 
 ########################################################################################
-def getElectionData():
+def getElectionData(election_df:pd.DataFrame()=None):
     """
         THIS FUNCTION reads in county-level presidential election vote data from 2000 to 2020,
         selects the last two elections (2016 and 2020), and returns a dataframe with the result
@@ -92,7 +94,8 @@ def getElectionData():
     """
 
     # Read in presidential election data by county, then select only after 2016 (i.e. 2016 and 2020).
-    election_df = pd.read_csv(DataFolder / r"countypres_2000-2020.csv")
+    if election_df is None:
+        election_df = pd.read_csv(DataFolder / r"countypres_2000-2020.csv")
     election_df = election_df[election_df["year"] >= 2016].copy()
 
     election_df.rename(
@@ -103,20 +106,25 @@ def getElectionData():
     ] = 11001.0
 
     # San Joaquin County, CA FIPS = 6077 has totalvotes as NAN. We can count them from the votes for the different parties
-    sjc_total_votes = (
-        election_df[election_df["totalvotes"].isnull()]
-        .groupby("COUNTYFP")
-        .sum()
-        .loc[6077, "candidatevotes"]
-    )
-    sjc_rows = list(election_df[election_df["totalvotes"].isnull()].index)
-    election_df.loc[election_df.index.isin(sjc_rows), "totalvotes"] = sjc_total_votes
+    if 6077 in list(election_df[election_df["totalvotes"].isnull()].loc[:,"COUNTYFP"]):
+        sjc_total_votes = (
+            election_df[election_df["totalvotes"].isnull()]
+            .groupby("COUNTYFP")
+            .sum()
+            .loc[6077, "candidatevotes"]
+        )
+        sjc_rows = list(election_df[election_df["totalvotes"].isnull()].index)
+        election_df.loc[election_df.index.isin(sjc_rows), "totalvotes"] = sjc_total_votes
 
+    # Questions: These commented lines still needed?
+    # election_df.version.unique() #array([20191203, 20210608], dtype=int64)
+    # election_df.office.unique() array(['PRESIDENT', 'US PRESIDENT'], dtype=object)
     election_df.drop(columns=["office", "mode", "version", "candidate"], inplace=True)
 
-    # Drop rows that are precincts and do not have a county fip
+    # Drop rows that are precincts and do not have a county fup
     election_df.dropna(subset=["COUNTYFP"], inplace=True)
 
+    # Questions: Do we want to collect all other parties under 'OTHER'?
     # Include similar ideologies under them where appropriate? Worth the effort?
     election_df["party"] = np.where(
         (election_df["party"] != "DEMOCRAT") & (election_df["party"] != "REPUBLICAN"),
@@ -210,7 +218,7 @@ def getStateLevelElectionData2020():
                  fractionalvotes         (candidatevotes / totalvotes)
     """
     # Join with state level election data to color the circles
-    state_election_df = pd.read_csv("./data/1976-2020-president.csv")
+    state_election_df = pd.read_csv(DataFolder / r"1976-2020-president.csv")
     state_election_df = state_election_df[state_election_df["year"] == 2020].copy()
     state_election_df.drop(
         columns=[

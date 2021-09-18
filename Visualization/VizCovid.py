@@ -17,7 +17,7 @@ alt.data_transformers.disable_max_rows()
 def createPercentPointChangeAvgDeathsChart(df: pd.DataFrame() = None):
     """
       THIS FUNCTION showing average COVID deaths versus percent change for each political affiliation.
-
+      
       Functions called: None
       Called by: Main code
 
@@ -47,8 +47,16 @@ def createPercentPointChangeAvgDeathsChart(df: pd.DataFrame() = None):
         )
         .mark_circle()
         .encode(
-            x=alt.X("pct_increase:Q", title="Percent point change"),
-            y=alt.Y("deaths_avg_per_100k:Q", title="Average deaths per 100K"),
+            x=alt.X(
+                "pct_increase:Q",
+                title="Percent point change",
+                scale=alt.Scale(domain=[-30, 30],),
+            ),
+            y=alt.Y(
+                "deaths_avg_per_100k:Q",
+                title="Average deaths per 100K",
+                scale=alt.Scale(domain=[0, 5],),
+            ),
             color=alt.condition(
                 selection,
                 alt.Color("changecolor:N", scale=None, legend=None),
@@ -88,17 +96,18 @@ def createPercentPointChangeAvgDeathsChart(df: pd.DataFrame() = None):
         .encode(x="x:Q", y="y:Q", text=alt.Text("note:N"))
     )
 
-    return (
+    final_chart = (
         perc_point_deaths_chart
         + mark_more_deaths_line1
         + mark_more_deaths_line2
         + more_deaths_text
     )
+    return final_chart
 
 
 def createSankeyForAffilitionChange():
-    """
-        This function creates a Sankey chart that shows the County affiliation change from
+    """ 
+        This function creates a Sankey chart that shows the County affiliation change from 
         2016 to 2019
         The interactive tooltip will offer the actual numbers
     """

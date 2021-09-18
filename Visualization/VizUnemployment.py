@@ -16,6 +16,7 @@ party_domain = ["DEMOCRAT", "REPUBLICAN"]
 party_range = ["#030D97", "#970D03"]
 
 
+
 def timestamp(t):
     return pd.to_datetime(t).timestamp() * 1000
 
@@ -143,14 +144,84 @@ def createUnemploymentCorrelationLineChart(df:pd.DataFrame()=None, title:str=Non
     )
     return final_chart
 
+def createUnemploymentCorrelationLineCombinedChart(df:pd.DataFrame()=None, title:str=None, sec_value:str=""):
+    """
+    Inputs
+        :param df:
+        :param title:
+        :param sec_value:
+    :return:
+        Altair Chart
+    """
+    unemployment_df=df[df["variable"]=="Average Unemployment Rate"].dropna()
+    sec_value_df=df[df["variable"]==sec_value].dropna()
+    unemployment_domain = [0, int(unemployment_df["value"].max() / 10 + 1) * 10]
+    if sec_value=="Average % of People with 1 Dose of Vaccine":
+        sec_value_domain = [0, int(sec_value_df["value"].max() / 10 + 1) * 10]
+    else:
+        sec_value_domain = [0, int(sec_value_df["value"].max() / 100 + 1) * 100]
+    sec_value_party_range = ["#878FFD", "#FC6A5F"]
+
+    sec_value_plot = alt.Chart(
+        sec_value_df,
+        title=title
+    ).mark_line(strokeDash=[5,4]).encode(
+        x=alt.X(
+            "month",
+            axis=alt.Axis(
+                title=None,
+                labelAngle=-45,
+            )
+        ),
+        y=alt.Y(
+            "value:Q",
+            title=sec_value,
+            scale=alt.Scale(
+                domain=sec_value_domain
+            )
+        ),
+        color=alt.Color(
+            "party:N",
+            scale=alt.Scale(domain=party_domain, range=party_range),
+            title="Party")
+    )
+
+    unemployment_plot = alt.Chart(
+        unemployment_df,
+
+    ).mark_line().encode(
+        x=alt.X(
+            "month",
+            axis = None
+        ),
+        y = alt.Y(
+            "value:Q",
+            title = "Average Monthly Unemployment Rate ",
+            scale = alt.Scale(
+                domain=unemployment_domain
+            )
+        ),
+        color = alt.Color(
+            "party:N",
+            scale = alt.Scale(domain=party_domain, range=party_range),
+            title = "Party")
+    )
+
+    final_chart = (sec_value_plot + unemployment_plot).resolve_scale(y="independent").properties(
+        height=270,
+        width=800
+    ).configure_title(
+        align="left", anchor="start"
+    )
+    return final_chart
 
 def createUnemploymentMaskChart(freq_df:pd.DataFrame() = None, infreq_df:pd.DataFrame() = None):
     if (freq_df is None) or (infreq_df is None):
         freq_df, infreq_df = getJuly2020UnemploymentAndMask(getUnemploymentCovidBase())
 
     unemployment_domain = [0, max(
-        int(freq_df["unemployment_rate"].max() / 10 + 1) * 10,
-        int(infreq_df["unemployment_rate"].max() / 10 + 1) * 10
+        int(freq_df["unemployment_rate"].dropna().max() / 10 + 1) * 10,
+        int(infreq_df["unemployment_rate"].dropna().max() / 10 + 1) * 10
     )]
     never_wear_mask_domain = [0, 1]
     # Prepare the plot for FREQUENT mask usage

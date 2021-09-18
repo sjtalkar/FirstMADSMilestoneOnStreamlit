@@ -7,6 +7,9 @@ import sys
 sys.path.append("../ETL")
 from ETL.EtlBase import DataFolder
 from ETL.EtlUrbanRural import *
+from ETL.EtlCovid import *
+from Visualization.VizBase import *
+from Visualization.VizCovid import *
 
 #######################################################################################################
 
@@ -17,17 +20,17 @@ def ElectionUrbanRuralDensityPlot(PEUrbanRuralDF:pd.DataFrame()=None):
     Returns a chart showing:
         x-axis: party - categorical - Winning candidate's party
         y-axis: PctRural - quantitative - Percentage of "how rural" a county is
-    
+
     Called by: Main code
     Functions called: MergeElectionUrbanRural()
-    '''    
-    
+    '''
+
     party_domain = ["DEMOCRAT", "REPUBLICAN"]
     party_range = ["#030D97", "#970D03"]
 
     if PEUrbanRuralDF is None:
         PEUrbanRuralDF = MergeElectionUrbanRural()
-    
+
     PctRuralDomain = [0, int(PEUrbanRuralDF["PctRural"].max() / 10) * 10]
 
     densityplot = alt.Chart(
@@ -66,33 +69,36 @@ def UrbanRuralCorrelation(PEUrbanRuralDF:pd.DataFrame()=None):
         for the winning party, a separate chart for each party
     Returns two charts, one for each party, showing:
         x-axis: Fraction of the vote - quantitative
-        y-axis: PctRural - quantitative 
-    
+        y-axis: PctRural - quantitative
+
     Called by: Main code
     Functions called: MergeElectionUrbanRural()
     '''
 
-    
+
     party_domain = ["DEMOCRAT", "REPUBLICAN"]
     party_range = ["#030D97", "#970D03"]
-    
+
     # Get the data and split into democrat and republican
     if PEUrbanRuralDF is None:
         PEUrbanRuralDF = MergeElectionUrbanRural()
 
-        
+
     PEUrbanRuralDF2 = PEUrbanRuralDF.copy()
     PEUrbanRuralDF2['fractionvotes'] = PEUrbanRuralDF2['candidatevotes'] / PEUrbanRuralDF2['totalvotes']
-    
+
     PEUrbanRuralDFDem = PEUrbanRuralDF2.copy()
     PEUrbanRuralDFDem = PEUrbanRuralDFDem[PEUrbanRuralDFDem['party'] == 'DEMOCRAT']
-    
+
     PEUrbanRuralDFRep = PEUrbanRuralDF2.copy()
     PEUrbanRuralDFRep = PEUrbanRuralDFRep[PEUrbanRuralDFRep['party'] == 'REPUBLICAN']
 
+    # Get correlation coefficients
+    RuralVoteCorrDem = PEUrbanRuralDFDem['PctRural'].corr(PEUrbanRuralDFDem['fractionvotes'])
+    RuralVoteCorrRep = PEUrbanRuralDFRep['PctRural'].corr(PEUrbanRuralDFRep['fractionvotes'])
 
     PctRuralDomain = [0, int(PEUrbanRuralDF2["PctRural"].max() / 10) * 10]
-    
+
     # Prepare the democrat chart
     voteDEMplot = alt.Chart(
         PEUrbanRuralDFDem,
@@ -102,7 +108,8 @@ def UrbanRuralCorrelation(PEUrbanRuralDF:pd.DataFrame()=None):
             "text": [
                 "Correlation between percent rural and fraction of county vote"
             ],
-            "subtitle": ["Counties won by democratic candidates",],
+            "subtitle": ["Counties won by democratic candidates",
+                         "Pearson correlation {:0.2f}".format(RuralVoteCorrDem),],
             "align": "left",
             "anchor": "start"
         }
@@ -127,7 +134,7 @@ def UrbanRuralCorrelation(PEUrbanRuralDF:pd.DataFrame()=None):
                                                           "PctRural").mark_line(
         color="black").encode(color=alt.value("black"))
     )
-    
+
     # Prepare the republican chart
     voteREPplot = alt.Chart(
         PEUrbanRuralDFRep,
@@ -137,7 +144,8 @@ def UrbanRuralCorrelation(PEUrbanRuralDF:pd.DataFrame()=None):
             "text": [
                 "Correlation between percent rural and fraction of county vote"
             ],
-            "subtitle": ["Counties won by republican candidates",],
+            "subtitle": ["Counties won by republican candidates",
+                         "Pearson correlation {:0.2f}".format(RuralVoteCorrRep),],
             "align": "left",
             "anchor": "start"
         }
@@ -162,9 +170,109 @@ def UrbanRuralCorrelation(PEUrbanRuralDF:pd.DataFrame()=None):
                                                           "PctRural").mark_line(
         color="black").encode(color=alt.value("black"))
     )
-    
+
     finalchart = alt.ConcatChart(concat=[finalDEMchart, finalREPchart])
 
     return finalchart
+
+#######################################################################################################
+
+def UrbanRuralRollingAvgCompChart(FullDF:pd.DataFrame()=None, UrbanDF:pd.DataFrame()=None, RuralDF:pd.DataFrame()=None):
+    '''
+    Forms a comparison chart showing rolling average of Covid cases for all counties,
+    urban counties and rural counties.
+
+    Returns a vertical concatenation of the three charts.
+    NOTE: Changed to return only two charts. Don't need full chart in presentation.
+
+    Called by: Main code
+    Functions called: UrbanRuralRollingAvgSingleChart()
+    '''
+
+    if (FullDF is None) and (UrbanDF is None) and (RuralDF is None):
+        # Get three county election dataframes
+        FullDF, UrbanDF, RuralDF = CountyElecUrbanRuralSplit(getUrbanRuralElectionRollingData)
+
+    # Get chart for all counties (See NOTE above)
+#    FullChart = UrbanRuralRollingAvgSingleChart(FullDF)
+
+    # Get chart for urban counties
+    UrbanChart = UrbanRuralRollingAvgSingleChart(UrbanDF)
+
+    # Get chart for rural counties
+    RuralChart = UrbanRuralRollingAvgSingleChart(RuralDF)
+
+    # Concatenate the charts vertically (See NOTE above)
+#    RollingAvgComparisonChart  = alt.vconcat(FullChart, UrbanChart, RuralChart)
+    RollingAvgComparisonChart  = alt.vconcat(UrbanChart, RuralChart).configure_title(
+        align="left",
+        anchor="start"
+    )
+
+    return RollingAvgComparisonChart
+
+#######################################################################################################
+
+def UrbanRuralRollingAvgSingleChart(case_rolling_df:pd.DataFrame()=None):    # Code mostly copied from Covid notebook
+    '''
+    Forms a chart of Covid case rolling average.
+
+    Returns a single chart.
+
+    Called by: UrbanRuralCompChart()
+    Functions called: getRollingCaseAverageSegmentLevel()
+    '''
+
+    if (case_rolling_df is None):
+        # Get rolling average of cases by segment
+        case_rolling_df = getRollingCaseAverageSegmentLevel()
+
+    # Create the chart
+    base, make_selector, highlight_segment, radio_select  = createCovidConfirmedTimeseriesChart(case_rolling_df)
+    selectors, rules, points, tooltip_text  = createTooltip(base, radio_select, case_rolling_df)
+
+    # Bring all the layers together with layering and concatenation
+    SingleChart = ( alt.layer(
+        highlight_segment, selectors, points,rules, tooltip_text ) | make_selector
+    )
+
+    return SingleChart
+
+#######################################################################################################
+
+def UrbanRuralAvgDeathsCompChart(FullDF:pd.DataFrame()=None, UrbanDF:pd.DataFrame()=None, RuralDF:pd.DataFrame()=None):
+    '''
+    Forms a comparison chart showing average Covid deaths for all counties,
+    urban counties and rural counties.
+
+    Returns a vertical concatenation of the three charts.
+    NOTE: Changed to return only two charts. Don't need full chart in presentation.
+
+    Called by: Main code
+    Functions called: CountyElecUrbanRuralSplit()
+                      createPercentPointChangeAvgDeathsChart()
+    '''
+
+    if (FullDF is None) and (UrbanDF is None) and (RuralDF is None):
+        # Get three county election dataframes
+        FullDF, UrbanDF, RuralDF = CountyElecUrbanRuralSplit(getUrbanRuralAvgDeathsData)
+
+    # Get chart for all counties (See NOTE above)
+#    FullChart = createPercentPointChangeAvgDeathsChart(FullDF)
+
+    # Get chart for urban counties
+    UrbanChart = createPercentPointChangeAvgDeathsChart(UrbanDF)
+
+    # Get chart for rural counties
+    RuralChart = createPercentPointChangeAvgDeathsChart(RuralDF)
+
+    # Concatenate the charts vertically (See NOTE above)
+#    AvgDeathsComparisonChart  = alt.vconcat(FullChart, UrbanChart, RuralChart)
+    AvgDeathsComparisonChart  = alt.vconcat(UrbanChart, RuralChart).configure_title(
+        align="left",
+        anchor="start"
+    )
+
+    return AvgDeathsComparisonChart
 
 #######################################################################################################

@@ -108,7 +108,7 @@ def UrbanRuralCorrelation(PEUrbanRuralDF:pd.DataFrame()=None):
             "text": [
                 "Correlation between percent rural and fraction of county vote"
             ],
-            "subtitle": ["Counties won by democratic candidates",
+            "subtitle": ["Counties won by Democratic candidate",
                          "Pearson correlation {:0.2f}".format(RuralVoteCorrDem),],
             "align": "left",
             "anchor": "start"
@@ -144,7 +144,7 @@ def UrbanRuralCorrelation(PEUrbanRuralDF:pd.DataFrame()=None):
             "text": [
                 "Correlation between percent rural and fraction of county vote"
             ],
-            "subtitle": ["Counties won by republican candidates",
+            "subtitle": ["Counties won by Republican candidate",
                          "Pearson correlation {:0.2f}".format(RuralVoteCorrRep),],
             "align": "left",
             "anchor": "start"
@@ -274,5 +274,122 @@ def UrbanRuralAvgDeathsCompChart(FullDF:pd.DataFrame()=None, UrbanDF:pd.DataFram
     )
 
     return AvgDeathsComparisonChart
+
+#######################################################################################################
+
+def UrbanRuralMaskPlots(UrbanMaskDF:pd.DataFrame()=None, RuralMaskDF:pd.DataFrame()=None,):
+    '''
+    Called by: Main code
+    Functions called:
+        UrbanRuralMaskData()
+        UrbanRuralMaskDensityPlots() (twice)
+    '''
+
+    if (UrbanMaskDF is None) or (RuralMaskDF is None):
+        # Get urban and rural mask usage frequency dataframes
+        UrbanMaskDF, RuralMaskDF = UrbanRuralMaskData()
+    
+    # Get the density plot for each
+    UrbanMaskPlot = UrbanRuralMaskDensityPlots(UrbanMaskDF)
+    RuralMaskPlot = UrbanRuralMaskDensityPlots(RuralMaskDF)
+    
+    # Combine into one vertical plot
+    CombinedMaskPlot = alt.vconcat(UrbanMaskPlot, RuralMaskPlot).configure_title(
+        align="left",
+        anchor="start"
+    )
+    
+    return CombinedMaskPlot
+
+#######################################################################################################
+
+def UrbanRuralMaskDensityPlots(UrbanRuralMaskFreqDF):
+    '''
+    Input: A dataframe showing election results by county, urban/rural designation
+        and infrequent/frequent mask usage as a float (add to 1.0)
+    Plots the urban/rural designation of the counties merged with the county-level
+        mask usage frequency as a density plot
+    Returns a chart showing:
+        Color:  party - categorical - Winning candidate's party
+        x-axis: Infrequent/Frequent - quantitative - Mask usage frequency
+        y-axis: Density
+    
+    Called (twice) by: UrbanRuralMaskPlots()
+    Functions called: None
+    '''    
+    
+    party_domain = ["DEMOCRAT", "REPUBLICAN"]
+    party_range = ["#030D97", "#970D03"]
+
+    # See if this is the urban or rural df
+    UrbanVSRural = UrbanRuralMaskFreqDF['UrbanRural'][0].upper()
+    # Based on that, set the subtitles
+    if UrbanVSRural == 'URBAN':
+        FreqTitle = alt.TitleParams("Frequent usage", fontWeight='normal')
+        InfreqTitle = alt.TitleParams("Infrequent usage", fontWeight='normal')
+        XTitle = None
+    if UrbanVSRural == 'RURAL':
+        FreqTitle = ''
+        InfreqTitle = ''
+        XTitle = 'Frequency'
+    
+    # Copy df to avoid SettingWithCopyWarning
+    UrbanRuralMaskFreqDF2 = UrbanRuralMaskFreqDF.copy()
+    
+    # Normalize the frequency
+    MaxInfreq = UrbanRuralMaskFreqDF['Infrequent'].max()
+    UrbanRuralMaskFreqDF2['Infrequent'] = UrbanRuralMaskFreqDF2['Infrequent'] / MaxInfreq
+    MaxFreq = UrbanRuralMaskFreqDF['Frequent'].max()
+    UrbanRuralMaskFreqDF2['Frequent'] = UrbanRuralMaskFreqDF2['Frequent'] / MaxFreq
+
+
+    # Frequent mask usage plot
+    FreqDensityplot = alt.Chart(
+        UrbanRuralMaskFreqDF2,
+        width=300,
+        height=100,
+        title=FreqTitle
+    ).transform_density(
+        density="Frequent",
+        groupby=["party"],
+        as_=["Frequency", "Density"]
+    ).mark_area(orient="vertical", opacity=0.8).encode(
+        x=alt.X("Frequency:Q",
+                scale=alt.Scale(domain=[0, 1.0]),
+                axis=alt.Axis(format='%'), title=XTitle),
+        y=alt.Y("Density:Q",
+                scale=alt.Scale(domain=[0, 6.0])),
+        color=alt.Color("party:N",
+                        scale=alt.Scale(domain=party_domain, range=party_range),
+                        title="Party", legend=None)
+    )
+    
+    # Infrequent mask usage plot
+    InfreqDensityplot = alt.Chart(
+        UrbanRuralMaskFreqDF2,
+        width=300,
+        height=100,
+        title=InfreqTitle
+    ).transform_density(
+        density="Infrequent",
+        groupby=["party"],
+        as_=["Frequency", "Density"]
+    ).mark_area(orient="vertical", opacity=0.8).encode(
+        x=alt.X("Frequency:Q",
+                scale=alt.Scale(domain=[0, 1.0]),
+                axis=alt.Axis(format='%'), title=XTitle),
+        y=alt.Y("Density:Q",
+                scale=alt.Scale(domain=[0, 6.0]), title=None),
+        color=alt.Color("party:N",
+                        scale=alt.Scale(domain=party_domain, range=party_range),
+                        title="Party", legend=None)
+    )
+
+    CombinedFrequencyPlot = alt.hconcat(FreqDensityplot, InfreqDensityplot,
+                                        title = "{} county distribution by mask usage"
+                                                        .format(UrbanVSRural)
+        )
+
+    return CombinedFrequencyPlot
 
 #######################################################################################################

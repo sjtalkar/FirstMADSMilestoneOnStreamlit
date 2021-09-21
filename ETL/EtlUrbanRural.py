@@ -200,3 +200,38 @@ def CountyElecUrbanRuralSplit(etl_function=getUrbanRuralElectionRollingData):
     return (FullDF, UrbanDF, RuralDF)
 
 #########################################################################################################
+
+def UrbanRuralMaskData():
+    '''
+    Reads in mask usage by county data
+    Returns two dataframes - urban and rural counties - with mask usage frequency
+    '''
+    # Read in county mask data
+    CountyMaskUseDF = pd.read_csv(DataFolder / 'mask-use-by-county.csv')
+
+    # Add columns into Infrequent and Frequent
+    CountyMaskUseDF['Infrequent'] = CountyMaskUseDF['NEVER'] \
+                                + CountyMaskUseDF['RARELY'] \
+                                + CountyMaskUseDF['SOMETIMES']
+
+    CountyMaskUseDF['Frequent'] = CountyMaskUseDF['FREQUENTLY'] \
+                              + CountyMaskUseDF['ALWAYS']
+
+    CountyMaskUseDF2 = CountyMaskUseDF[['COUNTYFP', 'Infrequent', 'Frequent']]
+    CountyMaskUseDF2 = CountyMaskUseDF2.rename(columns={'COUNTYFP': 'county_fips'})
+
+    # Get merged election and urban/rural data
+    ElecUrbanRuralDF = MergeElectionUrbanRural()
+
+    # Merge election/urban/rural with mask use frequency data
+    UrbanRuralMaskDF = ElecUrbanRuralDF.merge(CountyMaskUseDF2,
+                                              on='county_fips', how='inner')
+
+    UrbanMaskDF = UrbanRuralMaskDF[UrbanRuralMaskDF['UrbanRural'] == 'urban'] \
+                                                           .reset_index(drop=True)
+    RuralMaskDF = UrbanRuralMaskDF[UrbanRuralMaskDF['UrbanRural'] == 'rural'] \
+                                                           .reset_index(drop=True)
+
+    return (UrbanMaskDF, RuralMaskDF)
+
+#########################################################################################################

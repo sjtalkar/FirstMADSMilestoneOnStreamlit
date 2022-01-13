@@ -302,6 +302,7 @@ def app():
     """
     )
 
+    #COMMENTED OUT THE DENSITY PLOT
     #st.altair_chart(ElectionUrbanRuralDensityPlot(urban_rural_election_df))
 
     st.markdown(
@@ -373,8 +374,8 @@ def app():
     """
     )
 
-
-    st.altair_chart(UrbanRuralMaskPlots(urban_mask_df, rural_mask_df))
+    #COMMENTED OUT THE UrbanRuralMaskPlots
+    #st.altair_chart(UrbanRuralMaskPlots(urban_mask_df, rural_mask_df))
 
     st.markdown(
         """

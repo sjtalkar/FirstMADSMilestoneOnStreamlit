@@ -388,7 +388,7 @@ def app():
         mask_distribution_df,
     )
 #     freq.altair_chart(
-     st.altair_chart
+    st.altair_chart
         (
             (county_mask_chart)
             & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(

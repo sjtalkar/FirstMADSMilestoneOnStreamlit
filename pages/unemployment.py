@@ -130,7 +130,8 @@ def app():
     """
     )
 
-    st.altair_chart(createUnemploymentChart(unemployment_rate_since_2019_df))
+    #COMMENTED OUT createUnemploymentChart
+    #st.altair_chart(createUnemploymentChart(unemployment_rate_since_2019_df))
 
     st.markdown(
         """

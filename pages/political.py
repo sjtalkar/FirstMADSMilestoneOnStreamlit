@@ -368,7 +368,7 @@ def app():
         return df
 
     mask_distribution_df = load_mask_distribution_df()
-#     st.altair_chart(createMaskUsageDistributionChart(mask_distribution_df))
+    st.altair_chart(createMaskUsageDistributionChart(mask_distribution_df))
 
 #     county_pop_mask_df = load_county_pop_mask_df()
 #     county_pop_mask_freq_df = load_county_pop_mask_freq_df()

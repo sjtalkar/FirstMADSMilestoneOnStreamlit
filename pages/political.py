@@ -368,53 +368,55 @@ def app():
         return df
 
     mask_distribution_df = load_mask_distribution_df()
-    st.altair_chart(createMaskUsageDistributionChart(mask_distribution_df))
+#    st.altair_chart(createMaskUsageDistributionChart(mask_distribution_df))
 
-#     county_pop_mask_df = load_county_pop_mask_df()
-#     county_pop_mask_freq_df = load_county_pop_mask_freq_df()
-#     county_pop_mask_infreq_df = load_county_pop_mask_infreq_df()
+    county_pop_mask_df = load_county_pop_mask_df()
+    county_pop_mask_freq_df = load_county_pop_mask_freq_df()
+    county_pop_mask_infreq_df = load_county_pop_mask_infreq_df()
 
 #     freq, infreq = st.beta_columns(2)
-#     (
-#         county_mask_chart,
-#         legend_republican,
-#         legend_democrat,
-#         average_mask_chart,
-#     ) = createFreqCountyMaskUsageWithRanges(
-#         "FREQUENT",
-#         county_pop_mask_df,
-#         county_pop_mask_freq_df,
-#         county_pop_mask_infreq_df,
-#         mask_distribution_df,
-#     )
+    (
+        county_mask_chart,
+        legend_republican,
+        legend_democrat,
+        average_mask_chart,
+    ) = createFreqCountyMaskUsageWithRanges(
+        "FREQUENT",
+        county_pop_mask_df,
+        county_pop_mask_freq_df,
+        county_pop_mask_infreq_df,
+        mask_distribution_df,
+    )
 #     freq.altair_chart(
-#         (
-#             (county_mask_chart)
-#             & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
-#                 color="independent"
-#             )
-#         ).configure_title(align="left", anchor="start")
-#     )
+     st.altair_chart
+        (
+            (county_mask_chart)
+            & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
+                color="independent"
+            )
+        ).configure_title(align="left", anchor="start")
+    )
 
-#     (
-#         county_mask_chart,
-#         legend_republican,
-#         legend_democrat,
-#         average_mask_chart,
-#     ) = createFreqCountyMaskUsageWithRanges(
-#         "INFREQUENT",
-#         county_pop_mask_df,
-#         county_pop_mask_freq_df,
-#         county_pop_mask_infreq_df,
-#         mask_distribution_df,
-#     )
+    (
+        county_mask_chart,
+        legend_republican,
+        legend_democrat,
+        average_mask_chart,
+    ) = createFreqCountyMaskUsageWithRanges(
+        "INFREQUENT",
+        county_pop_mask_df,
+        county_pop_mask_freq_df,
+        county_pop_mask_infreq_df,
+        mask_distribution_df,
+    )
 
 #     infreq.altair_chart(
-#         (
-#             (county_mask_chart)
-#             & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
-#                 color="independent"
-#             )
-#         ).configure_title(align="left", anchor="start")
-#     )
+    st.altair_chart
+        (
+            (county_mask_chart)
+            & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
+                color="independent"
+            )
+        ).configure_title(align="left", anchor="start")
+    )
     st.markdown("""---""")

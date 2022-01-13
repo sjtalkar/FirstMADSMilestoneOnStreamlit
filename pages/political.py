@@ -387,8 +387,7 @@ def app():
         county_pop_mask_infreq_df,
         mask_distribution_df,
     )
-#     freq.altair_chart(
-    st.altair_chart
+    st.altair_chart(
         (
             (county_mask_chart)
             & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
@@ -410,10 +409,9 @@ def app():
         mask_distribution_df,
     )
 
-#     infreq.altair_chart(
-    st.altair_chart
-        (
-            (county_mask_chart)
+    st.altair_chart(
+       (
+        (county_mask_chart)
             & (average_mask_chart | legend_republican | legend_democrat).resolve_scale(
                 color="independent"
             )

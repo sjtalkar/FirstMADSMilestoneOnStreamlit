@@ -2,7 +2,6 @@ import pandas as pd
 import altair as alt
 import sys
 from vega_datasets import data
-import plotly.graph_objs as go
 
 sys.path.append("../ETL")
 from ETL.EtlElection import *

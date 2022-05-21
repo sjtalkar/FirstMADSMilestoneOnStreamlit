@@ -141,7 +141,7 @@ def app():
     df = election_change_and_covid_death_df.copy()
     df["deaths_avg_per_100k"] = df["deaths_avg_per_100k"].astype("float")
     df["pct_increase"] = df["pct_increase"].astype("float")
-    col1, col2, col3, col4 = st.beta_columns(4)
+    col1, col2, col3, col4 = st.columns(4)
     formatted_string = "{:.2f}".format(
         election_change_and_covid_death_df["deaths_avg_per_100k"].mean()
     )
@@ -369,7 +369,7 @@ def app():
 
     mask_distribution_df = load_mask_distribution_df()
     #NOTE THIS HAS BEEN COMMENTED OUT
-#    st.altair_chart(createMaskUsageDistributionChart(mask_distribution_df))
+    st.altair_chart(createMaskUsageDistributionChart(mask_distribution_df))
 
     county_pop_mask_df = load_county_pop_mask_df()
     county_pop_mask_freq_df = load_county_pop_mask_freq_df()

@@ -303,7 +303,7 @@ def app():
     )
 
     #COMMENTED OUT THE DENSITY PLOT
-    #st.altair_chart(ElectionUrbanRuralDensityPlot(urban_rural_election_df))
+    st.altair_chart(ElectionUrbanRuralDensityPlot(urban_rural_election_df))
 
     st.markdown(
         """
